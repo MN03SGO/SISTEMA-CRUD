@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import mysql.connector
-
+import os
 
 #conexion bd(sql)
 #intento 22
@@ -27,11 +27,13 @@ def verificar_login():
         conexion.close()
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"No se pudo conectar a la BD: {err}")
-
 #ventana
 ventana = Tk()
 ventana.title("Login")
 ventana.geometry("673x771+611+141")
+
+##no funciono funcion sin bordes
+
 
 imgICo = PhotoImage(file="img/LOG4iIni.png")
 ventana.iconphoto(False, imgICo)
