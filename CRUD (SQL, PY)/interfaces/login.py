@@ -59,3 +59,4 @@ ventana.img_user = img_user
 ventana.img_contra = img_contra
 ventana.backgroundimage = backgroundimage
 ventana.mainloop()
+#by Sigaran
