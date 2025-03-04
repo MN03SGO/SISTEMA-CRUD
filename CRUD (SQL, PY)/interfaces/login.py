@@ -3,6 +3,8 @@ from tkinter import messagebox
 import mysql.connector
 
 
+#conexion bd(sql)
+#intento 22
 def verificar_login():
     usuario = user.get()
     password = contra.get()
@@ -18,7 +20,7 @@ def verificar_login():
         cursor.execute(consulta, (usuario, password))
         resultado = cursor.fetchone()
         if resultado:
-            messagebox.showinfo("Éxito", "Inicio de sesión exitoso")
+            messagebox.showinfo("Inicio de sesión exitoso")
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
         cursor.close()
@@ -26,6 +28,7 @@ def verificar_login():
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"No se pudo conectar a la BD: {err}")
 
+#ventana
 ventana = Tk()
 ventana.title("Login")
 ventana.geometry("673x771+611+141")
