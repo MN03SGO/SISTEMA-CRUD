@@ -2,9 +2,13 @@ from tkinter import *
 from tkinter import messagebox
 import mysql.connector
 import os
+import subprocess
 
-#conexion bd(sql)
-#intento 22
+
+def abrir_index():
+    ventana.withdraw()  
+    subprocess.Popen(["python3", "interfaces/index.py"])  
+# Conexion BD
 def verificar_login():
     usuario = user.get()
     password = contra.get()
@@ -20,24 +24,21 @@ def verificar_login():
         cursor.execute(consulta, (usuario, password))
         resultado = cursor.fetchone()
         if resultado:
-            messagebox.showinfo("Inicio de sesión exitoso")
+            messagebox.showinfo("Exito", "Inicio de sesión exitoso")
+            abrir_index()
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
         cursor.close()
         conexion.close()
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"No se pudo conectar a la BD: {err}")
-#ventana
+
 ventana = Tk()
 ventana.title("Login")
 ventana.geometry("673x771+611+141")
-
-##no funciono funcion sin bordes
-
-
 imgICo = PhotoImage(file="img/LOG4iIni.png")
 ventana.iconphoto(False, imgICo)
-
+#
 frame = Frame(ventana, width=100, height=390)
 frame.pack(fill=Y)
 backgroundimage = PhotoImage(file="img/LOG4iIni.png")
@@ -48,15 +49,13 @@ label_user = Label(ventana, image=img_user)
 label_user.place(x=200, y=390)
 user = Entry(ventana, width=18, font=("Arial", 14))
 user.place(x=250, y=400)
-
 # contra
 img_contra = PhotoImage(file="img/Contra.png")
 label_contra = Label(ventana, image=img_contra)
 label_contra.place(x=200, y=460)
 contra = Entry(ventana, width=18, font=("Arial", 14), show="*")
 contra.place(x=250, y=470)
-
-
+# btn
 btn_login = Button(ventana, text="Iniciar Sesión", font=("Arial", 14), command=verificar_login)
 btn_login.place(x=270, y=520)
 
@@ -64,4 +63,4 @@ ventana.img_user = img_user
 ventana.img_contra = img_contra
 ventana.backgroundimage = backgroundimage
 ventana.mainloop()
-#by Sigaran
+# by Sigaran
