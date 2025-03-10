@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import webbrowser
 import mysql.connector  # Importar el conector de MySQL
@@ -25,11 +25,7 @@ def conectar_bd():
 ventana = tk.Tk()
 ventana.title("CRUD")
 
-
-
-
 try:
-    
     img_boton_nuevo = Image.open("img/Nuevo.png")
     img_boton_nuevo = ImageTk.PhotoImage(img_boton_nuevo)
 
@@ -73,7 +69,7 @@ ventana.rowconfigure(0, weight=1)
 
 
 class MiFrame(tk.Frame):
-    #constructor
+    # Constructor
     def __init__(self, master=None):
         super().__init__(master)
         self.grid(row=0, column=0, padx=50, pady=50, sticky="nsew")
@@ -83,7 +79,9 @@ class MiFrame(tk.Frame):
         self.tabla_galletas()
         self.cargar_datos_tabla()
         self.campo_buscar()
-        #TEXTOS Y ENTRADAS
+        self.tipos_galletas_ingresados = []  # Lista para almacenar los tipos de galletas ingresados
+
+    # Campos de galleta
     def campo_galleta(self):
         # Labels
         self.label_nombre = tk.Label(self, text="Nombre: ", font=("Arial", 18, "bold"))
@@ -189,11 +187,14 @@ class MiFrame(tk.Frame):
         self.boton_eliminar.config(state="disabled")
 
     def guardar_dat(self):
-        
         nombre = self.mi_nombre.get()
         cantidad = self.mi_cantidad.get()
         precio = self.mi_precio.get()
         descripcion = self.mi_descripcion.get()
+
+        if nombre in self.tipos_galletas_ingresados:
+            messagebox.showerror("Error", f"El tipo de galleta '{nombre}' ya ha sido ingresado.")
+            return
 
         conexion = conectar_bd()
         if conexion:
@@ -204,6 +205,7 @@ class MiFrame(tk.Frame):
                 cursor.execute(sql, valores)
                 conexion.commit()
                 print("Datos guardados correctamente.")
+                self.tipos_galletas_ingresados.append(nombre)
                 self.cargar_datos_tabla()  
                 self.Des_campos()
             except mysql.connector.Error as err:
@@ -213,7 +215,6 @@ class MiFrame(tk.Frame):
                 conexion.close()
 
     def modificar_dat(self):
-        
         seleccion = self.tabla.selection()
         if seleccion:
             id_galleta = self.tabla.item(seleccion, "text")
@@ -240,10 +241,10 @@ class MiFrame(tk.Frame):
                     conexion.close()
 
     def eliminar_dat(self):
-        
         seleccion = self.tabla.selection()
         if seleccion:
             id_galleta = self.tabla.item(seleccion, "text")
+            nombre = self.tabla.item(seleccion, "values")[0]
 
             conexion = conectar_bd()
             if conexion:
@@ -254,6 +255,8 @@ class MiFrame(tk.Frame):
                     cursor.execute(sql, valores)
                     conexion.commit()
                     print("Datos eliminados correctamente.")
+                    if nombre in self.tipos_galletas_ingresados:
+                        self.tipos_galletas_ingresados.remove(nombre)
                     self.cargar_datos_tabla() 
                     self.Des_campos()
                 except mysql.connector.Error as err:
@@ -275,12 +278,15 @@ class MiFrame(tk.Frame):
 
                 for row in rows:
                     self.tabla.insert("", "end", text=row[0], values=(row[1], row[2], row[3], row[4]))
+                    if row[1] not in self.tipos_galletas_ingresados:
+                        self.tipos_galletas_ingresados.append(row[1])
             except mysql.connector.Error as err:
                 print(f"Error al cargar datos: {err}")
             finally:
                 cursor.close()
                 conexion.close()
-    #tabla de tk 
+
+    # Tabla de galletas
     def tabla_galletas(self):
         self.rowconfigure(5, weight=1)
         self.columnconfigure(0, weight=1)
@@ -293,7 +299,7 @@ class MiFrame(tk.Frame):
         self.tabla = ttk.Treeview(frame_tabla, columns=("Nombre", "Cantidad", "Precio", "Descripcion"))
         self.tabla.grid(row=0, column=0, sticky="nsew")
 
-        # Agregar scrollbar  de tkinter
+        # Agregar scrollbar de tkinter
         scrollbar = ttk.Scrollbar(frame_tabla, orient="vertical", command=self.tabla.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.tabla.configure(yscrollcommand=scrollbar.set)
@@ -304,7 +310,6 @@ class MiFrame(tk.Frame):
         self.tabla.heading("Precio", text="Precio")
         self.tabla.heading("Descripcion", text="Descripción")
 
-        
         self.tabla.bind("<<TreeviewSelect>>", self.cargar_datos_seleccionados)
 
     def cargar_datos_seleccionados(self, event):
@@ -319,8 +324,7 @@ class MiFrame(tk.Frame):
                 self.mi_descripcion.set(valores[3])
                 self.Hab_campos()
 
-
-    ##BUSCAR 
+    # Campo de búsqueda
     def campo_buscar(self):
         self.label_buscar = tk.Label(self, text="Buscar Galleta:", font=("Arial", 18, "bold"))
         self.label_buscar.grid(row=6, column=0, padx=10, pady=10, sticky="e")
@@ -354,5 +358,5 @@ class MiFrame(tk.Frame):
 
 
 frame = MiFrame(ventana)
-ventana.mainloop()   
-#by SIGARAN
+ventana.mainloop()
+# by SIGARAN
