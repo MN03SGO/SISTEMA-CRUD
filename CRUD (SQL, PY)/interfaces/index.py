@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import webbrowser
-import mysql.connector  
+import mysql.connector  # Importar el conector de MySQL
 
 
 def abrir_github():
@@ -27,7 +27,9 @@ ventana.title("CRUD")
 
 
 
+
 try:
+    
     img_boton_nuevo = Image.open("img/Nuevo.png")
     img_boton_nuevo = ImageTk.PhotoImage(img_boton_nuevo)
 
@@ -80,7 +82,8 @@ class MiFrame(tk.Frame):
         self.Des_campos()
         self.tabla_galletas()
         self.cargar_datos_tabla()
-
+        self.campo_buscar()
+        #TEXTOS Y ENTRADAS
     def campo_galleta(self):
         # Labels
         self.label_nombre = tk.Label(self, text="Nombre: ", font=("Arial", 18, "bold"))
@@ -277,7 +280,7 @@ class MiFrame(tk.Frame):
             finally:
                 cursor.close()
                 conexion.close()
-
+    #tabla de tk 
     def tabla_galletas(self):
         self.rowconfigure(5, weight=1)
         self.columnconfigure(0, weight=1)
@@ -301,7 +304,7 @@ class MiFrame(tk.Frame):
         self.tabla.heading("Precio", text="Precio")
         self.tabla.heading("Descripcion", text="Descripción")
 
-        # Asignar evento de selección
+        
         self.tabla.bind("<<TreeviewSelect>>", self.cargar_datos_seleccionados)
 
     def cargar_datos_seleccionados(self, event):
@@ -316,5 +319,40 @@ class MiFrame(tk.Frame):
                 self.mi_descripcion.set(valores[3])
                 self.Hab_campos()
 
+
+    ##BUSCAR 
+    def campo_buscar(self):
+        self.label_buscar = tk.Label(self, text="Buscar Galleta:", font=("Arial", 18, "bold"))
+        self.label_buscar.grid(row=6, column=0, padx=10, pady=10, sticky="e")
+
+        self.mi_busqueda = tk.StringVar()
+        self.entry_buscar = tk.Entry(self, textvariable=self.mi_busqueda, font=("Arial", 18), width=35)
+        self.entry_buscar.grid(row=6, column=1, padx=10, pady=10, sticky="w")
+
+        self.boton_buscar = tk.Button(self, text="Buscar", font=("Arial", 14, "bold"), command=self.buscar_galleta)
+        self.boton_buscar.grid(row=6, column=2, padx=10, pady=10, sticky="w")
+
+    def buscar_galleta(self):
+        termino = self.mi_busqueda.get()
+        conexion = conectar_bd()
+        if conexion:
+            try:
+                cursor = conexion.cursor()
+                cursor.execute("SELECT id, nombre, cantidad, precio, descripcion FROM galletas WHERE nombre LIKE %s", ("%" + termino + "%",))
+                rows = cursor.fetchall()
+
+                for item in self.tabla.get_children():
+                    self.tabla.delete(item)
+
+                for row in rows:
+                    self.tabla.insert("", "end", text=row[0], values=(row[1], row[2], row[3], row[4]))
+            except mysql.connector.Error as err:
+                print(f"Error en la búsqueda: {err}")
+            finally:
+                cursor.close()
+                conexion.close()
+
+
 frame = MiFrame(ventana)
-ventana.mainloop()  
+ventana.mainloop()   
+#by SIGARAN
