@@ -1,0 +1,9 @@
+DATOS USADOS EN LA BD
+
+
+BD: Sistema
+
+tabla = login ( usu int primary key auto increment, NombreUsu varchar (120) not null, Contra varchar(100));
+
+
+tabla=galleta(id int primary key auto increment, nombre varchar (121) not null, cantidad int, precio decimal (12.2), descripcion text));
