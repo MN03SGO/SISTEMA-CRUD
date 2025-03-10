@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import mysql.connector
 
@@ -38,7 +38,7 @@ class PuntoDeVenta:
         self.tabla_productos.heading("Precio", text="Precio")
         self.tabla_productos.bind("<<TreeviewSelect>>", self.agregar_al_carrito)
 
-        # tbla
+        # Frame para el carrito de compras
         self.frame_carrito = tk.Frame(self.master)
         self.frame_carrito.pack(pady=20)
 
@@ -53,7 +53,7 @@ class PuntoDeVenta:
         self.tabla_carrito.heading("Cantidad", text="Cantidad")
         self.tabla_carrito.heading("Subtotal", text="Subtotal")
 
-        # Btn compra
+        # Botón para finalizar la compra
         self.boton_finalizar = tk.Button(self.master, text="Finalizar Compra", font=("Arial", 14, "bold"), bg="green", fg="white", command=self.finalizar_compra)
         self.boton_finalizar.pack(pady=10)
 
@@ -62,20 +62,23 @@ class PuntoDeVenta:
 
     def cargar_productos(self, filtro=""):
         self.tabla_productos.delete(*self.tabla_productos.get_children())
-        conexion = mysql.connector.connect(host="localhost", user="admin", password="root", database="Sistema")
-        cursor = conexion.cursor()
-        consulta = "SELECT id, nombre, precio FROM galletas"
-        if filtro:
-            consulta += " WHERE nombre LIKE %s"
-            cursor.execute(consulta, ("%" + filtro + "%",))
-        else:
-            cursor.execute(consulta)
-        productos = cursor.fetchall()
+        try:
+            conexion = mysql.connector.connect(host="localhost", user="admin", password="root", database="Sistema")
+            cursor = conexion.cursor()
+            consulta = "SELECT id, nombre, precio FROM galletas"
+            if filtro:
+                consulta += " WHERE nombre LIKE %s"
+                cursor.execute(consulta, ("%" + filtro + "%",))
+            else:
+                cursor.execute(consulta)
+            productos = cursor.fetchall()
 
-        for producto in productos:
-            self.tabla_productos.insert("", "end", values=(producto[1], 1, f"${producto[2]:.2f}"))
+            for producto in productos:
+                self.tabla_productos.insert("", "end", values=(producto[1], 1, f"${producto[2]:.2f}"))
 
-        conexion.close()
+            conexion.close()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Error", f"Error al cargar productos: {err}")
 
     def buscar_producto(self):
         filtro = self.entry_busqueda.get()
@@ -104,15 +107,17 @@ class PuntoDeVenta:
         self.label_total.config(text=f"Total: ${self.total:.2f}")
 
     def finalizar_compra(self):
-        print("Compra Finalizada")
-        print(f"Total a pagar: ${self.total:.2f}")
+        if not self.carrito:
+            messagebox.showwarning("Advertencia", "El carrito está vacío.")
+            return
+
+        messagebox.showinfo("Compra Finalizada", f"Total a pagar: ${self.total:.2f}")
         self.carrito.clear()
         self.tabla_carrito.delete(*self.tabla_carrito.get_children())
         self.actualizar_total()
 
 ventana = tk.Tk()
 ventana.title("Punto de Venta")
-
 
 punto_venta = PuntoDeVenta(ventana)
 ventana.mainloop()
