@@ -24,10 +24,10 @@ def verificar_login():
         cursor.execute(consulta, (usuario, password))
         resultado = cursor.fetchone()
         if resultado:
-            messagebox.showinfo("Exito", "Inicio de sesión exitoso")
+            messagebox.showinfo("Acceso permitido", "Inicio de sesión exitoso")
             abrir_index()
         else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            messagebox.showerror("Acceso denegado", "Usuario o contraseña incorrectos")
         cursor.close()
         conexion.close()
     except mysql.connector.Error as err:
